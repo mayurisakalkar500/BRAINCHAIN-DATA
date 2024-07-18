@@ -1,1 +1,103 @@
+A table to store user details:
+CREATE TABLE User (
+	UserID INT PRIMARY KEY AUTO_INCREMENT,
+	Username VARCHAR(50) NOT NULL UNIQUE,
+	Password VARCHAR(255) NOT NULL,
+	Email VARCHAR(100) NOT NULL UNIQUE,
+	DateCreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ 
+The Profile table includes number of left and right swipes, and number of Barters for each.
+CREATE TABLE Profile (
+	ProfileID INT PRIMARY KEY AUTO_INCREMENT,
+	UserID INT,
+	FirstName VARCHAR(50),
+	LastName VARCHAR(50),
+	Age INT,
+	Gender VARCHAR(10),
+	ProfessionalDetails VARCHAR(255),
+	Bio TEXT,
+	Barters INT DEFAULT 0,  -- New field for number of successful connections
+	LeftSwipes INT DEFAULT 0,  -- New field for number of left swipes
+	RightSwipes INT DEFAULT 0,  -- New field for number of right swipes
+	FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE
+);
+ 
+ Interest Table
+CREATE TABLE Interest (
+	InterestID INT PRIMARY KEY AUTO_INCREMENT,
+	UserID INT,
+	Type ENUM('Hobby', 'Like', 'Dislike'),
+	Description VARCHAR(255),
+	FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE
+);
+ 
+Primary Location of User 
+CREATE TABLE Location (
+	LocationID INT PRIMARY KEY AUTO_INCREMENT,
+	UserID INT,
+	Country VARCHAR(50),
+	State VARCHAR(50),
+	City VARCHAR(50),
+	Area VARCHAR(100),
+	FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE
+);
+ 
+ Connections Table
+CREATE TABLE Connections (
+	ConnectionID INT PRIMARY KEY AUTO_INCREMENT,
+	ProfileID1 INT,
+	ProfileID2 INT,
+	DateConnected TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	FOREIGN KEY (ProfileID1) REFERENCES Profile(ProfileID) ON DELETE CASCADE,
+	FOREIGN KEY (ProfileID2) REFERENCES Profile(ProfileID) ON DELETE CASCADE
+);
+ 
+Swipes
+CREATE TABLE Swipes (
+    SwipeID INT PRIMARY KEY AUTO_INCREMENT,
+    FromProfileID INT,
+    ToProfileID INT,
+    SwipeType ENUM('Left', 'Right'),
+    SwipeSubtype ENUM('Red', 'Blue', 'Green') DEFAULT NULL,
+    DateSwiped TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (FromProfileID) REFERENCES Profile(ProfileID) ON DELETE CASCADE,
+    FOREIGN KEY (ToProfileID) REFERENCES Profile(ProfileID) ON DELETE CASCADE
+);
 
+WATCHTIME
+Major YouTube Domains
+1.Technology
+2.Entertainment
+3.Sports
+4.Health
+5.Education
+6.News
+7.Music 
+8.Lifestyle
+
+
+CREATE TABLE YouTubeWatchTime (
+    WatchTimeID INT PRIMARY KEY AUTO_INCREMENT,
+    UserID INT,
+    Domain ENUM('Technology', 'Entertainment', 'Sports', 'Health', 'Education', 'News', 'Music', 'Lifestyle'),
+    TimeSpent INT, -- Time spent in minutes
+    DateRecorded DATE,
+    FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE
+);
+
+Example query 1: Record Time Spent
+INSERT INTO YouTubeWatchTime (UserID, Domain, TimeSpent, DateRecorded)
+VALUES (1, 'Technology', 30, '2024-06-06');
+
+Example query 2: Total Time Spent by a User on Each Domain
+SELECT Domain, SUM(TimeSpent) AS TotalTime
+FROM YouTubeWatchTime
+WHERE UserID = 1
+GROUP BY Domain;
+
+Example query 3: Time Spent by All Users on a Specific Domain
+SELECT UserID, SUM(TimeSpent) AS TotalTime
+FROM YouTubeWatchTime
+WHERE Domain = 'Entertainment'
+GROUP BY UserID;
